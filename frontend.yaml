@@ -1,0 +1,40 @@
+- name: frontend setup 
+  hosts: frontend
+  become: yes
+
+  tasks:
+  - name: disabling and enabling nginx
+    ansible.builtin.command: |
+    - dnf module disable nginx -y 
+    - dnf module enable nginx:1.24 -y
+
+  - name: installing nginx
+    ansible.builtin.package:
+      name: nginx
+      state: present
+  
+  - name: removing existing html file
+    ansible.builtin.file:
+      path: /usr/share/nginx/html/* 
+      state: absent
+
+  - name: Recreate the empty web root directory
+    ansible.builtin.file:
+      path: /usr/share/nginx/html/*
+      state: directory
+  
+  - name: copying content to nginx conf
+    ansible.builtin.copy:
+      src: nginx.conf
+      dest: /etc/nginx/nginx.conf
+
+  - name: starting and enabling nginx
+    ansible.builtin.service:
+      name: nginx
+      state: started
+      enabled: true
+
+
+
+
+  
