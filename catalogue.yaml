@@ -63,7 +63,7 @@
   
   - name: installing mongosh client_token
     ansible.builtin.package:
-      name: mongod-mongosh
+      name: mongodb-mongosh
       state: present
   
   - name: connnect to mongodb catalogue
