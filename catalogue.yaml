@@ -1,0 +1,83 @@
+- name: catalogue set up 
+  hosts: catalogue
+  become: yes
+
+  tasks:
+  - name: disabling and enabling nodejs
+    ansible.builtin.command: dnf module disable nodejs -y 
+    ansible.builtin.command: dnf module enable nodejs:20 -y
+
+  - name: installing nodejs
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+  
+  - name: adding application user
+    ansible.builtin.user:
+      name: roboshop
+      state: present
+      system: true
+      shell: /sbin/nologin
+      home: /app
+
+  - name: creating app directory
+    ansible.builtin.file:
+      state: directory
+      path:  /app
+
+  - name: downloading the catalogue files
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/catalogue-v3.zip
+      dest: /tmp/catalogue.zip
+
+  - name: unzipping the files
+    ansible.builtin.unarchive:
+      src: tmp/catalogue.zip 
+      dest: /app
+      remote_src: yes
+  
+  - name: installing dependences
+    community.general.npm:
+      path: /app
+
+  - name: copying the service file to systemd
+    ansible.builtin.copy:
+      src: catalogue.service
+      dest: /etc/systemd/system/catalogue.service
+
+  - name: reload deamon
+    ansible.builtin.systemd_service:
+      daemon_reload: true
+
+  - name: starting and enabling catalogue service
+    ansible.builtin.service:
+      name: catalogue
+      state: started
+      enabled: true
+
+    
+  - name: copying repo
+    ansible.builtin.copy:
+      src: mongo.repo
+      dest: /etc/yum.repos.d/mongo.repo
+  
+  - name: installing mongosh client_token
+    ansible.builtin.package:
+      name: mongod-mongosh
+      state: present
+  
+  - name: connnect to mongodb catalogue
+    ansible.builtin.command: mongosh mongodb.daws86s.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
+    register: catalogue_output
+  
+  - name: schema load in database
+    ansible.builtin.shell: mongosh --host mongo.prathyusha.fun </app/db/master-data.js
+
+    when: catalogue_output.stdout | int < 0
+
+  - name: start and enable cataalogue
+    ansible.builtin.service:
+      name: catalogue
+      enabled: yes
+      state: started  
+
