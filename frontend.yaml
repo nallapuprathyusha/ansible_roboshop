@@ -24,6 +24,7 @@
     ansible.builtin.unarchive:
       src: /tmp/frontend.zip
       dest: /usr/share/nginx/html/
+      remote_src: yes
   
   - name: copying nigix config file
     ansible.builtin.copy:
