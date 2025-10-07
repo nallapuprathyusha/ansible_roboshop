@@ -7,7 +7,7 @@
     ansible.builtin.command: dnf module disable nodejs -y 
     ansible.builtin.command: dnf module enable nodejs:20 -y
 
-  - name: installing nodejs
+  - name: installing nodejs 
     ansible.builtin.package:
       name: nodejs
       state: present
@@ -32,7 +32,7 @@
 
   - name: unzipping the files
     ansible.builtin.unarchive:
-      src: tmp/catalogue.zip 
+      src: /tmp/catalogue.zip 
       dest: /app
       remote_src: yes
   
