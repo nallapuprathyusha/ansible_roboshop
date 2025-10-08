@@ -1,5 +1,5 @@
 - name: cart set up
-  hosts: user
+  hosts: cart
   become: yes
 
   tasks:
