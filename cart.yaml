@@ -15,12 +15,21 @@
         comment: system user
         shell: /sbin/nologin
         home: /app
-        system: true
+        system: 
+     # Safe to remove directory, because 2nd time if we run it will download freshly. no error if does not exist
+    - name: remove app directory
+      ansible.builtin.file:
+        path: /app
+        state: absent
     
     - name: creating app directory
       ansible.builtin.file:
         path: /app
         state: directory
+    - name: Delete cart file
+      ansible.builtin.file:
+        path: /tmp/cart.zip
+        state: absent
 
     - name: downloading application code to created app directory
       ansible.builtin.get_url:
@@ -42,13 +51,11 @@
       ansible.builtin.copy:
         src: cart.service
         dest: /etc/systemd/system/cart.service
-
-    - name: deamon reload
-      ansible.builtin.systemd_service:
-        daemon_reload: true
+        
 
     - name: starting and enabling cart
       ansible.builtin.service:
         name: cart
         state: started
         enabled: true
+        daemon_reload: true
