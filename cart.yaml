@@ -1,0 +1,59 @@
+- name: cart set up
+  hosts: user
+  become: yes
+
+  tasks:
+    - name: enabling and disabling nodejs
+      ansible.builtin.shell: dnf module disable nodejs -y && dnf module enable nodejs:20 -y
+
+    - name: installing nodejs
+      ansible.builtin.command: dnf install nodejs
+
+    - name: creating application user
+      ansible.builtin.user:
+        user: roboshop
+        comment: system user
+        shell: /sbin/nologin
+        home: /app
+        system: true
+    
+    - name: creating app directory
+      ansible.builtin.file:
+        path: /app
+        state: directory
+
+    - name: downloading application code to created app directory
+      ansible.builtin.get_url:
+        url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
+        dest: /tmp/cart.zip
+        
+
+    - name: unzipping files in app directory
+      ansible.builtin.unarchive:
+        src: /tmp/cart.zip
+        dest: /app
+        remote_src: yes
+
+    - name: installing dependences
+      community.general.npm:
+       path: /app
+    
+    - name: copying systemd service file
+      ansible.builtin.copy:
+        src: cart.service
+        dest: /etc/systemd/system/cart.service
+
+    - name: deamon reload
+      ansible.builtin.systemd_service:
+        state: present
+        daemon_reload: true
+
+    - name: starting and enabling user
+      ansible.builtin.service:
+        name: user
+        state: started
+        enabled: true
+
+
+
+     
