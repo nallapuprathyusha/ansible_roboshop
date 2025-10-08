@@ -67,15 +67,15 @@
       state: present
   
   - name: connnect to mongodb catalogue
-    ansible.builtin.command: mongosh mongo.prathyusha.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
+    ansible.builtin.command: mongosh mongodb.prathyusha.fun --quiet --eval "db.getMongo().getDBNames().indexOf('catalogue')"
     register: catalogue_output
   
   - name: schema load in database
-    ansible.builtin.shell: mongosh --host mongo.prathyusha.fun </app/db/master-data.js
+    ansible.builtin.shell: mongosh --host mongodb.prathyusha.fun </app/db/master-data.js
 
     when: catalogue_output.stdout | int < 0
 
-  - name: start and enable cataalogue
+  - name: start and enable catalogue
     ansible.builtin.service:
       name: catalogue
       enabled: yes
