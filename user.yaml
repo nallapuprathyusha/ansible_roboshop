@@ -55,12 +55,10 @@
       src: user.service
       dest: /etc/systemd/system/user.service
 
-  - name: reload deamon
+  - name: daemon reload enable and start
     ansible.builtin.systemd_service:
+      name: user
+      enabled: true
+      state: started
       daemon_reload: true
   
-  - name: starting and enabling user
-    ansible.builtin.service:
-      name: user
-      state: started
-      enabled: true
