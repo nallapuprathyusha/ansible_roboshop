@@ -7,11 +7,13 @@
     zone_id: "Z0994508312PR2YKTSFA1" # replace with your ID
     domain_name: "prathyusha.fun"
     # we can pass instances through command line using -e
-    # instances: 
-    # - mongodb
-    # - redis
-    # - mysql
-    # - rabbitmq
+  instances: 
+    - mongodb
+    - catalogue
+    - frontend
+    - redis
+    - user
+    
   tasks:
     - name: create ec2 instance
       amazon.aws.ec2_instance:
