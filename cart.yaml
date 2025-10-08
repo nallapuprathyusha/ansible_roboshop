@@ -7,15 +7,16 @@
       ansible.builtin.shell: dnf module disable nodejs -y && dnf module enable nodejs:20 -y
 
     - name: installing nodejs
-      ansible.builtin.command: dnf install nodejs
+      ansible.builtin.command: dnf install nodejs -y
 
     - name: creating application user
       ansible.builtin.user:
-        user: roboshop
+        name: roboshop
         comment: system user
+        system: true
         shell: /sbin/nologin
         home: /app
-        system: true
+        
      
      # Safe to remove directory, because 2nd time if we run it will download freshly. no error if does not exist
     - name: remove app directory
@@ -25,8 +26,9 @@
     
     - name: creating app directory
       ansible.builtin.file:
-        path: /app
         state: directory
+        path: /app
+        
     
     - name: Delete cart file
       ansible.builtin.file:
@@ -56,8 +58,8 @@
         
 
     - name: starting and enabling cart
-      ansible.builtin.service:
+      ansible.builtin.systemd_service:
         name: cart
-        state: started
         enabled: true
+        state: started
         daemon_reload: true
