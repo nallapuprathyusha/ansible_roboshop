@@ -1,65 +1,173 @@
-- name: cart set up
+- name: setup cart server
   hosts: cart
   become: yes
-
   tasks:
-    - name: enabling and disabling nodejs
-      ansible.builtin.shell: dnf module disable nodejs -y && dnf module enable nodejs:20 -y
+  - name: disable default nodejs
+    ansible.builtin.command: dnf module disable nodejs -y
 
-    - name: installing nodejs
-      ansible.builtin.command: dnf install nodejs -y
+  - name: enable nodejs 20
+    ansible.builtin.command: dnf module enable nodejs:20 -y
 
-    - name: creating application user
-      ansible.builtin.user:
-        name: roboshop
-        comment: system user
-        system: true
-        shell: /sbin/nologin
-        home: /app
+  - name: install nodejs
+    ansible.builtin.package:
+      name: nodejs
+      state: present
+
+  - name: create roboshop system user
+    ansible.builtin.user:
+      name: roboshop
+      comment: RoboShop System user
+      system: true
+      shell: /sbin/nologin
+      home: /app
+  # Safe to remove directory, because 2nd time if we run it will download freshly. no error if does not exist
+  - name: remove app directory
+    ansible.builtin.file:
+      path: /app
+      state: absent
+
+  - name: create app directory
+    ansible.builtin.file:
+      state: directory
+      path: /app
+
+  - name: Delete cart file
+    ansible.builtin.file:
+      path: /tmp/cart.zip
+      state: absent
+
+  - name: download cart application
+    ansible.builtin.get_url:
+      url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
+      dest: /tmp/cart.zip
+
+  - name: extract cart application
+    ansible.builtin.unarchive:
+      src: /tmp/cart.zip
+      dest: /app
+      remote_src: yes
+
+  - name: install dependencies
+    community.general.npm:
+      path: /app
+
+  - name: copy cart service
+    ansible.builtin.copy:
+      src: cart.service
+      dest: /etc/systemd/system/cart.service
+
+  - name: daemon reload enable and start
+    ansible.builtin.systemd_service:
+      name: cart
+      enabled: true
+      state: started
+      daemon_reload: true
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# - name: cart set up
+#   hosts: cart
+#   become: yes
+
+#   tasks:
+#     - name: enabling and disabling nodejs
+#       ansible.builtin.shell: dnf module disable nodejs -y && dnf module enable nodejs:20 -y
+
+#     - name: installing nodejs
+#       ansible.builtin.command: dnf install nodejs -y
+
+#     - name: creating application user
+#       ansible.builtin.user:
+#         name: roboshop
+#         comment: system user
+#         system: true
+#         shell: /sbin/nologin
+#         home: /app
         
      
-     # Safe to remove directory, because 2nd time if we run it will download freshly. no error if does not exist
-    - name: remove app directory
-      ansible.builtin.file:
-        path: /app
-        state: absent
+#      # Safe to remove directory, because 2nd time if we run it will download freshly. no error if does not exist
+#     - name: remove app directory
+#       ansible.builtin.file:
+#         path: /app
+#         state: absent
     
-    - name: creating app directory
-      ansible.builtin.file:
-        state: directory
-        path: /app
+#     - name: creating app directory
+#       ansible.builtin.file:
+#         state: directory
+#         path: /app
         
     
-    - name: Delete cart file
-      ansible.builtin.file:
-        path: /tmp/cart.zip
-        state: absent
+#     - name: Delete cart file
+#       ansible.builtin.file:
+#         path: /tmp/cart.zip
+#         state: absent
 
-    - name: downloading application code to created app directory
-      ansible.builtin.get_url:
-        url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
-        dest: /tmp/cart.zip
+#     - name: downloading application code to created app directory
+#       ansible.builtin.get_url:
+#         url: https://roboshop-artifacts.s3.amazonaws.com/cart-v3.zip
+#         dest: /tmp/cart.zip
         
 
-    - name: unzipping files in app directory
-      ansible.builtin.unarchive:
-        src: /tmp/cart.zip
-        dest: /app
-        remote_src: yes
+#     - name: unzipping files in app directory
+#       ansible.builtin.unarchive:
+#         src: /tmp/cart.zip
+#         dest: /app
+#         remote_src: yes
 
-    - name: installing dependences
-      community.general.npm:
-       path: /app
+#     - name: installing dependences
+#       community.general.npm:
+#        path: /app
     
-    - name: copying systemd service file
-      ansible.builtin.copy:
-        src: cart.service
-        dest: /etc/systemd/system/cart.service
+#     - name: copying systemd service file
+#       ansible.builtin.copy:
+#         src: cart.service
+#         dest: /etc/systemd/system/cart.service
         
 
-    - name: starting and enabling cart
-      ansible.builtin.systemd_service:
-        name: cart
-        enabled: true
-        state: started
-        daemon_reload: true
+#     - name: starting and enabling cart
+#       ansible.builtin.systemd_service:
+#         name: cart
+#         enabled: true
+#         state: started
+#         daemon_reload: true
