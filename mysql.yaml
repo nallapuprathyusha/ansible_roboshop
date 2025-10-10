@@ -4,15 +4,15 @@
 
   tasks:
   - name: install mysql
-    ansible.builtin.package:
+    ansible.builtin.dnf:
       name: mysql-server
       state: present
 
-  - name: enabling and disabling mysql
+  - name: starting and enabling redis
     ansible.builtin.service:
-      name: mysql
-      enable: true
-      state: started 
+      name: mysqld
+      state: started
+      enabled: yes 
 
   - name: setup root password
     ansible.builtin.command: mysql_secure_installation --set-root-pass RoboShop@1
