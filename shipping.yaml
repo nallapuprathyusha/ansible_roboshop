@@ -2,6 +2,13 @@
   hosts: shipping
   become: yes
   tasks:
+  - name: change ownership of /app
+    ansible.builtin.file:
+    path: /app
+    owner: roboshop
+    group: roboshop
+    recurse: yes
+
   - name: install maven
     ansible.builtin.dnf:
       name: "{{ item }}"
