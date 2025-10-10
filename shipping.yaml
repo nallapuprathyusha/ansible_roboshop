@@ -5,8 +5,19 @@
   tasks:
     - name: installing maven
       ansible.builtin.dnf:
-        name: maven
+        name: "{{ item }}"
         state: present
+      loop:
+      - maven
+      - mysql
+    
+    - name: install mysql python libraries
+      ansible.builtin.pip:
+        excutable: pip3.9
+        name: "{{ item }}"
+      loop:
+      - cryptography
+      - PyMySQL
     
     - name: add application user
       ansible.builtin.user:
@@ -25,6 +36,7 @@
       ansible.builtin.file:
         state: director
         path: /app
+    
     - name: Delete shipping file
       ansible.builtin.file:
         path: /tmp/shipping.zip
@@ -58,11 +70,12 @@
         src: shipping.service
         dest: /etc/systemd/system/shipping.service
 
+    
     - name: import shipping data into mysql
       community.mysql.mysql_db:
       state: import
       name: all
-      login_host: mysql.daws86s.fun
+      login_host: mysql.prathyusha.fun
       login_user: root
       login_password: RoboShop@1
       target: "{{ item }}"
