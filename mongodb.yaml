@@ -1,5 +1,5 @@
 - name: mongodb set up
-  hosts: mongo
+  hosts: mongodb
   become: yes
 
   tasks:
