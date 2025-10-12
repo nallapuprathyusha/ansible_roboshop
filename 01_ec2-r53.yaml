@@ -8,12 +8,12 @@
     domain_name: "prathyusha.fun"
     # we can pass instances through command line using -e
     instances: 
-      # - mongodb
-      # - catalogue
-      # - frontend
-      # - redis
-      # - user
-      # - cart
+      - mongodb
+      - catalogue
+      - frontend
+      - redis
+      - user
+      - cart
       - mysql
       - shipping
       
